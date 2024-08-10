@@ -1,5 +1,11 @@
 local PANEL = {}
 
+PANEL.m_BlacklistedClasses = {
+	["player"] = true,
+	["viewmodel_predicted"] = true,
+	["gmod_hands"] = true
+}
+
 function PANEL:Init()
 	self:ParentToHUD()
 	self:Hide()
@@ -47,6 +53,7 @@ end
 function PANEL:Think()
 	local LookingEntity = LocalPlayer():GetEyeTrace().Entity
 	if not IsValid(LookingEntity) then return self:Hide() end
+	if self.m_BlacklistedClasses[LookingEntity:GetClass()] then return self:Hide() end
 
 	local LookingOwner = LookingEntity:GetPropProtectionOwner()
 
