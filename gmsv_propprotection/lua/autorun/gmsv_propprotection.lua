@@ -1,9 +1,13 @@
 require("gmsv")
 
+IncludeClient("gmsv_propprotection/infopanel.lua")
+
 IncludeShared("includes/extensions/gmsv_pp_entity.lua")
 
 gmsv.StartModule("propprotection")
 do
+	local InfoPanel -- Client only
+
 	if SERVER then
 		-- Yay ugly
 		function PlayerSpawnedEffect(Player, Model, Entity) Entity:SetPropProtectionOwner(Player) end
@@ -13,16 +17,6 @@ do
 		function PlayerSpawnedSENT(Player, Entity) Entity:SetPropProtectionOwner(Player) end
 		function PlayerSpawnedSWEP(Player, Entity) Entity:SetPropProtectionOwner(Player) end
 		function PlayerSpawnedVehicle(Player, Entity) Entity:SetPropProtectionOwner(Player) end
-	elseif CLIENT then
-		function HUDPaint()
-			local TargetEntity = LocalPlayer():GetEyeTrace().Entity
-			if not IsValid(TargetEntity) then return end
-
-			surface.SetFont("BudgetLabel")
-			surface.SetTextPos(ScrW() / 2, ScrH() / 2)
-			surface.SetTextColor(255, 255, 255, 255)
-			surface.DrawText(tostring(TargetEntity:GetPropProtectionOwner()))
-		end
 	end
 
 	function PhysgunPickup(Player, Entity)
@@ -56,7 +50,8 @@ do
 			hook.Add("PlayerSpawnedSWEP", self:GetName(), self.PlayerSpawnedSWEP)
 			hook.Add("PlayerSpawnedVehicle", self:GetName(), self.PlayerSpawnedVehicle)
 		elseif CLIENT then
-			hook.Add("HUDPaint", self:GetName(), self.HUDPaint)
+			InfoPanel = vgui.Create("gmsv_PropProtectionInfoPanel")
+			print("ENABLOLED")
 		end
 
 		hook.Add("PhysgunPickup", self:GetName(), self.PhysgunPickup)
@@ -74,7 +69,9 @@ do
 			hook.Remove("PlayerSpawnedSWEP", self:GetName())
 			hook.Remove("PlayerSpawnedVehicle", self:GetName())
 		elseif CLIENT then
-			hook.Remove("HUDPaint", self:GetName())
+			if IsValid(InfoPanel) then
+				InfoPanel:Remove()
+			end
 		end
 
 		hook.Remove("PhysgunPickup", self:GetName())
