@@ -31,6 +31,15 @@ do
 		end
 	end
 
+	function CanTool(Player, Trace)
+		local TargetEntity = Trace.Entity
+		if not IsValid(TargetEntity) then return end
+
+		if TargetEntity:GetPropProtectionOwner() ~= Player then
+			return false
+		end
+	end
+
 	function OnEnabled(self)
 		if SERVER then
 			hook.Add("PlayerSpawnedEffect", self:GetName(), self.PlayerSpawnedEffect)
@@ -45,6 +54,7 @@ do
 		end
 
 		hook.Add("PhysgunPickup", self:GetName(), self.PhysgunPickup)
+		hook.Add("CanTool", self:GetName(), self.CanTool)
 	end
 
 	function OnDisabled(self)
@@ -61,6 +71,7 @@ do
 		end
 
 		hook.Remove("PhysgunPickup", self:GetName())
+		hook.Remove("CanTool", self:GetName())
 	end
 end
 gmsv.EndModule()
