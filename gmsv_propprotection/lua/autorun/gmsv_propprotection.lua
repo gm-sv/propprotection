@@ -40,6 +40,12 @@ do
 		end
 	end
 
+	function CanProperty(Player, _, Entity)
+		if Entity:GetPropProtectionOwner() ~= Player then
+			return false
+		end
+	end
+
 	function OnEnabled(self)
 		if SERVER then
 			hook.Add("PlayerSpawnedEffect", self:GetName(), self.PlayerSpawnedEffect)
@@ -55,6 +61,7 @@ do
 
 		hook.Add("PhysgunPickup", self:GetName(), self.PhysgunPickup)
 		hook.Add("CanTool", self:GetName(), self.CanTool)
+		hook.Add("CanProperty", self:GetName(), self.CanProperty)
 	end
 
 	function OnDisabled(self)
@@ -72,6 +79,7 @@ do
 
 		hook.Remove("PhysgunPickup", self:GetName())
 		hook.Remove("CanTool", self:GetName())
+		hook.Remove("CanProperty", self:GetName())
 	end
 end
 gmsv.EndModule()
