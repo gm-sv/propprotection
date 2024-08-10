@@ -16,6 +16,8 @@ if CLIENT then
 		local Owner = net.ReadEntity()
 		if not IsValid(Target) then return end
 
+		MsgDev("Received owner of ", Target, ": ", Owner)
+
 		Target:SetPropProtectionOwner(Owner)
 		Target:SetOwnerSyncRequested(false)
 	end)
@@ -44,7 +46,7 @@ elseif SERVER then
 		local Target = net.ReadEntity()
 		if not IsValid(Target) or Target:IsWorld() then return end
 
-		MsgDev("Replicating owner of ", Target)
+		MsgDev("Replicating owner of ", Target, " to '", Requester:GetName(), "'")
 
 		net.Start("gmsv_propprotection_sync")
 			net.WriteEntity(Target)
