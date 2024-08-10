@@ -51,7 +51,6 @@ do
 			hook.Add("PlayerSpawnedVehicle", self:GetName(), self.PlayerSpawnedVehicle)
 		elseif CLIENT then
 			InfoPanel = vgui.Create("gmsv_PropProtectionInfoPanel")
-			print("ENABLOLED")
 		end
 
 		hook.Add("PhysgunPickup", self:GetName(), self.PhysgunPickup)
