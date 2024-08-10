@@ -13,26 +13,6 @@ do
 		function PlayerSpawnedSENT(Player, Entity) Entity:SetPropProtectionOwner(Player) end
 		function PlayerSpawnedSWEP(Player, Entity) Entity:SetPropProtectionOwner(Player) end
 		function PlayerSpawnedVehicle(Player, Entity) Entity:SetPropProtectionOwner(Player) end
-
-		function OnEnabled(self)
-			hook.Add("PlayerSpawnedEffect", self:GetName(), self.PlayerSpawnedEffect)
-			hook.Add("PlayerSpawnedNPC", self:GetName(), self.PlayerSpawnedNPC)
-			hook.Add("PlayerSpawnedProp", self:GetName(), self.PlayerSpawnedProp)
-			hook.Add("PlayerSpawnedRagdoll", self:GetName(), self.PlayerSpawnedRagdoll)
-			hook.Add("PlayerSpawnedSENT", self:GetName(), self.PlayerSpawnedSENT)
-			hook.Add("PlayerSpawnedSWEP", self:GetName(), self.PlayerSpawnedSWEP)
-			hook.Add("PlayerSpawnedVehicle", self:GetName(), self.PlayerSpawnedVehicle)
-		end
-
-		function OnDisabled(self)
-			hook.Remove("PlayerSpawnedEffect", self:GetName())
-			hook.Remove("PlayerSpawnedNPC", self:GetName())
-			hook.Remove("PlayerSpawnedProp", self:GetName())
-			hook.Remove("PlayerSpawnedRagdoll", self:GetName())
-			hook.Remove("PlayerSpawnedSENT", self:GetName())
-			hook.Remove("PlayerSpawnedSWEP", self:GetName())
-			hook.Remove("PlayerSpawnedVehicle", self:GetName())
-		end
 	elseif CLIENT then
 		function HUDPaint()
 			local TargetEntity = LocalPlayer():GetEyeTrace().Entity
@@ -43,14 +23,44 @@ do
 			surface.SetTextColor(255, 255, 255, 255)
 			surface.DrawText(tostring(TargetEntity:GetPropProtectionOwner()))
 		end
+	end
 
-		function OnEnabled(self)
+	function PhysgunPickup(Player, Entity)
+		if Entity:GetPropProtectionOwner() ~= Player then
+			return false
+		end
+	end
+
+	function OnEnabled(self)
+		if SERVER then
+			hook.Add("PlayerSpawnedEffect", self:GetName(), self.PlayerSpawnedEffect)
+			hook.Add("PlayerSpawnedNPC", self:GetName(), self.PlayerSpawnedNPC)
+			hook.Add("PlayerSpawnedProp", self:GetName(), self.PlayerSpawnedProp)
+			hook.Add("PlayerSpawnedRagdoll", self:GetName(), self.PlayerSpawnedRagdoll)
+			hook.Add("PlayerSpawnedSENT", self:GetName(), self.PlayerSpawnedSENT)
+			hook.Add("PlayerSpawnedSWEP", self:GetName(), self.PlayerSpawnedSWEP)
+			hook.Add("PlayerSpawnedVehicle", self:GetName(), self.PlayerSpawnedVehicle)
+		elseif CLIENT then
 			hook.Add("HUDPaint", self:GetName(), self.HUDPaint)
 		end
 
-		function OnDisabled(self)
+		hook.Add("PhysgunPickup", self:GetName(), self.PhysgunPickup)
+	end
+
+	function OnDisabled(self)
+		if SERVER then
+			hook.Remove("PlayerSpawnedEffect", self:GetName())
+			hook.Remove("PlayerSpawnedNPC", self:GetName())
+			hook.Remove("PlayerSpawnedProp", self:GetName())
+			hook.Remove("PlayerSpawnedRagdoll", self:GetName())
+			hook.Remove("PlayerSpawnedSENT", self:GetName())
+			hook.Remove("PlayerSpawnedSWEP", self:GetName())
+			hook.Remove("PlayerSpawnedVehicle", self:GetName())
+		elseif CLIENT then
 			hook.Remove("HUDPaint", self:GetName())
 		end
+
+		hook.Remove("PhysgunPickup", self:GetName())
 	end
 end
 gmsv.EndModule()
