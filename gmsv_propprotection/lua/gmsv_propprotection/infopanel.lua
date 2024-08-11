@@ -1,9 +1,12 @@
 local PANEL = {}
 
 PANEL.m_BlacklistedClasses = {
+	["class C_BaseEntity"] = true,
+	["func_brush"] = true,
+	["func_reflective_glass"] = true,
+	["gmod_hands"] = true,
 	["player"] = true,
-	["viewmodel_predicted"] = true,
-	["gmod_hands"] = true
+	["viewmodel_predicted"] = true
 }
 
 function PANEL:Init()
