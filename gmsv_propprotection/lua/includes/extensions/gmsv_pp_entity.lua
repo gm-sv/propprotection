@@ -9,7 +9,10 @@ function ENTITY:SetPropProtectionOwner(Owner)
 end
 
 if CLIENT then
+	local CurTime = CurTime
+
 	AccessorFunc(ENTITY, "m_bPropProtectionSyncRequested", "OwnerSyncRequested", FORCE_BOOL)
+	AccessorFunc(ENTITY, "m_flPropProtectionSyncTime", "OwnerSyncTime", FORCE_NUMBER)
 
 	net.Receive("gmsv_propprotection_sync", function()
 		local Target = net.ReadEntity()
@@ -27,6 +30,12 @@ if CLIENT then
 			return self.m_hOwner
 		end
 
+		-- Retry every second
+		if CurTime() - (self:GetOwnerSyncTime() or 0) > 1 then
+			self:SetOwnerSyncTime(0)
+			self:SetOwnerSyncRequested(false)
+		end
+
 		if not self:GetOwnerSyncRequested() then
 			MsgDev("Requesting owner of ", self)
 
@@ -34,6 +43,7 @@ if CLIENT then
 				net.WriteEntity(self)
 			net.SendToServer()
 
+			self:SetOwnerSyncTime(CurTime())
 			self:SetOwnerSyncRequested(true)
 		end
 
@@ -43,6 +53,10 @@ elseif SERVER then
 	util.AddNetworkString("gmsv_propprotection_sync")
 
 	net.Receive("gmsv_propprotection_sync", function(_, Requester)
+		if not net.TestRateLimit(Requester, "gmsv_propprotection_sync", 0.1) then -- 10 props a second
+			return
+		end
+
 		local Target = net.ReadEntity()
 		if not IsValid(Target) or Target:IsWorld() then return end
 
