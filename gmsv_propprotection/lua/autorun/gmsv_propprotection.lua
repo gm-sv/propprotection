@@ -4,7 +4,7 @@ IncludeClient("gmsv_propprotection/infopanel.lua")
 
 IncludeShared("includes/extensions/gmsv_pp_entity.lua")
 
-gmsv.StartModule("propprotection")
+gmsv.StartModule("PropProtection")
 do
 	local InfoPanel -- Client only
 
