@@ -9,11 +9,18 @@ if CLIENT then
 	net.Receive("gmsv_propprotection_sync", function()
 		local Target = net.ReadEntity()
 		local Owner = net.ReadEntity()
+		local ValidOwner = net.ReadBool()
+
 		if not IsValid(Target) then return end
 
 		MsgDev("Received owner of ", Target, ": ", Owner)
 
-		Target:SetCreator(Owner)
+		if ValidOwner then
+			Target:SetCreator(Owner)
+		else
+			Target:SetCreator(nil)
+		end
+
 		Target:SetOwnerSyncRequested(false)
 	end)
 
@@ -43,7 +50,7 @@ if CLIENT then
 			self:SetOwnerSyncRequested(true)
 		end
 
-		return NULL
+		return nil
 	end
 elseif SERVER then
 	util.AddNetworkString("gmsv_propprotection_sync")
@@ -56,11 +63,14 @@ elseif SERVER then
 		local Target = net.ReadEntity()
 		if not IsValid(Target) or Target:IsWorld() then return end
 
+		local Creator = Target:GetCreator()
+
 		MsgDev("Replicating owner of ", Target, " to '", Requester:GetName(), "'")
 
 		net.Start("gmsv_propprotection_sync")
 			net.WriteEntity(Target)
-			net.WriteEntity(Target:GetCreator())
+			net.WriteEntity(Creator)
+			net.WriteBool(IsValid(Creator))
 		net.Send(Requester)
 	end)
 end

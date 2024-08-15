@@ -37,7 +37,7 @@ function PANEL:GetEntityName(Entity)
 			return Entity:GetClass()
 		end
 	else
-		return "World"
+		return Entity == nil and "World" or "Disconnected"
 	end
 end
 
