@@ -3,7 +3,7 @@ local ENTITY = FindMetaTable("Entity")
 AccessorFunc(ENTITY, "m_strCreatorID", "CreatorID", FORCE_STRING)
 
 if CLIENT then
-	local CurTime = CurTime
+	local SysTime = SysTime
 
 	AccessorFunc(ENTITY, "m_bPropProtectionSyncRequested", "OwnerSyncRequested", FORCE_BOOL)
 	AccessorFunc(ENTITY, "m_flPropProtectionSyncTime", "OwnerSyncTime", FORCE_NUMBER)
@@ -21,7 +21,7 @@ if CLIENT then
 					Entity:SetCreator(nil)
 					Entity:SetCreatorID(nil)
 					Entity:SetOwnerSyncRequested(false)
-					-- self:SetOwnerSyncTime(0)
+					Entity:SetOwnerSyncTime(0)
 				end
 			end
 
@@ -61,10 +61,10 @@ if CLIENT then
 		end
 
 		-- Retry every second
-		-- if CurTime() - (self:GetOwnerSyncTime() or 0) > 1 then
-		-- 	self:SetOwnerSyncTime(0)
-		-- 	self:SetOwnerSyncRequested(false)
-		-- end
+		if SysTime() - (self:GetOwnerSyncTime() or 0) > 1 then
+			self:SetOwnerSyncTime(0)
+			self:SetOwnerSyncRequested(false)
+		end
 
 		if not self:GetOwnerSyncRequested() then
 			MsgDev("Requesting owner of ", self)
@@ -73,7 +73,7 @@ if CLIENT then
 				net.WriteEntity(self)
 			net.SendToServer()
 
-			-- self:SetOwnerSyncTime(CurTime())
+			self:SetOwnerSyncTime(SysTime())
 			self:SetOwnerSyncRequested(true)
 		end
 
