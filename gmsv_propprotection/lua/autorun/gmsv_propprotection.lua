@@ -17,6 +17,12 @@ do
 		function PlayerSpawnedSENT(Player, Entity) Entity:SetCreator(Player) end
 		function PlayerSpawnedSWEP(Player, Entity) Entity:SetCreator(Player) end
 		function PlayerSpawnedVehicle(Player, Entity) Entity:SetCreator(Player) end
+
+		function AddCleanup(Player, Type, Entity)
+			Entity:SetCreator(Player)
+
+			return ORIGINAL_FUNCTION(Player, Type, Entity)
+		end
 	end
 
 	function PhysgunPickup(Player, Entity)
@@ -49,6 +55,10 @@ do
 			hook.Add("PlayerSpawnedSENT", self:GetName(), self.PlayerSpawnedSENT)
 			hook.Add("PlayerSpawnedSWEP", self:GetName(), self.PlayerSpawnedSWEP)
 			hook.Add("PlayerSpawnedVehicle", self:GetName(), self.PlayerSpawnedVehicle)
+
+			gmsv.RunOnRegistered("Detours", function(Detours)
+				Detours:DetourGeneric("_G[\"cleanup\"][\"Add\"]", self.AddCleanup)
+			end)
 		elseif CLIENT then
 			InfoPanel = vgui.Create("gmsv_PropProtectionInfoPanel")
 		end
@@ -67,6 +77,10 @@ do
 			hook.Remove("PlayerSpawnedSENT", self:GetName())
 			hook.Remove("PlayerSpawnedSWEP", self:GetName())
 			hook.Remove("PlayerSpawnedVehicle", self:GetName())
+
+			gmsv.RunOnRegistered("Detours", function(Detours)
+				Detours:RestoreGeneric("_G[\"cleanup\"][\"Add\"]")
+			end)
 		elseif CLIENT then
 			if IsValid(InfoPanel) then
 				InfoPanel:Remove()
