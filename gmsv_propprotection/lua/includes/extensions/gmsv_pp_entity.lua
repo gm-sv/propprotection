@@ -20,6 +20,8 @@ if CLIENT then
 				if Entity:GetCreatorID() == OwnerID then
 					Entity:SetCreator(nil)
 					Entity:SetCreatorID(nil)
+					Entity:SetOwnerSyncRequested(false)
+					-- self:SetOwnerSyncTime(0)
 				end
 			end
 
@@ -71,7 +73,7 @@ if CLIENT then
 				net.WriteEntity(self)
 			net.SendToServer()
 
-			self:SetOwnerSyncTime(CurTime())
+			-- self:SetOwnerSyncTime(CurTime())
 			self:SetOwnerSyncRequested(true)
 		end
 
