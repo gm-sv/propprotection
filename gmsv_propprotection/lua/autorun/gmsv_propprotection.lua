@@ -23,6 +23,31 @@ do
 
 			return ORIGINAL_FUNCTION(Player, Type, Entity)
 		end
+
+		function OnPlayerReliableStream(Player)
+			local HasEntities = false
+			local PlayerID = Player:SteamID()
+
+			for _, Entity in ents.Iterator() do
+				if Entity:GetCreatorID() == PlayerID then
+					Entity:SetCreator(Player)
+
+					HasEntities = true
+				end
+			end
+
+			if not HasEntities then
+				MsgDev("No entities to wipe for ", Player:GetName())
+				return
+			end
+
+			MsgDev("Broadcasting wipe for ", Player:GetName())
+
+			net.Start("gmsv_propprotection_sync")
+				net.WriteBool(true)
+				net.WriteString(Player:SteamID()) -- Can't use player because this is called before the entity exists for other clients
+			net.Broadcast()
+		end
 	end
 
 	function PhysgunPickup(Player, Entity)
@@ -55,6 +80,7 @@ do
 			hook.Add("PlayerSpawnedSENT", self:GetName(), self.PlayerSpawnedSENT)
 			hook.Add("PlayerSpawnedSWEP", self:GetName(), self.PlayerSpawnedSWEP)
 			hook.Add("PlayerSpawnedVehicle", self:GetName(), self.PlayerSpawnedVehicle)
+			hook.Add("OnPlayerReliableStream", self:GetName(), self.OnPlayerReliableStream)
 
 			gmsv.RunOnRegistered("Detours", function(Detours)
 				Detours:DetourGeneric("_G[\"cleanup\"][\"Add\"]", self.AddCleanup)
@@ -77,6 +103,7 @@ do
 			hook.Remove("PlayerSpawnedSENT", self:GetName())
 			hook.Remove("PlayerSpawnedSWEP", self:GetName())
 			hook.Remove("PlayerSpawnedVehicle", self:GetName())
+			hook.Remove("OnPlayerReliableStream", self:GetName())
 
 			gmsv.RunOnRegistered("Detours", function(Detours)
 				Detours:RestoreGeneric("_G[\"cleanup\"][\"Add\"]")

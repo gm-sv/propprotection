@@ -1,5 +1,7 @@
 local ENTITY = FindMetaTable("Entity")
 
+AccessorFunc(ENTITY, "m_strCreatorID", "CreatorID", FORCE_STRING)
+
 if CLIENT then
 	local CurTime = CurTime
 
@@ -7,6 +9,23 @@ if CLIENT then
 	AccessorFunc(ENTITY, "m_flPropProtectionSyncTime", "OwnerSyncTime", FORCE_NUMBER)
 
 	net.Receive("gmsv_propprotection_sync", function()
+		local Wipe = net.ReadBool()
+
+		if Wipe then
+			local OwnerID = net.ReadString()
+
+			MsgDev("Received owner wipe for ", OwnerID)
+
+			for _, Entity in ents.Iterator() do
+				if Entity:GetCreatorID() == OwnerID then
+					Entity:SetCreator(nil)
+					Entity:SetCreatorID(nil)
+				end
+			end
+
+			return
+		end
+
 		local Target = net.ReadEntity()
 		local Owner = net.ReadEntity()
 		local ValidOwner = net.ReadBool()
@@ -26,6 +45,12 @@ if CLIENT then
 
 	function ENTITY:SetCreator(Creator)
 		self.m_hCreator = Creator
+
+		if IsValid(Creator) and Creator:IsPlayer() then
+			self:SetCreatorID(Creator:SteamID())
+		else
+			self:SetCreatorID(nil)
+		end
 	end
 
 	function ENTITY:GetCreator()
@@ -34,10 +59,10 @@ if CLIENT then
 		end
 
 		-- Retry every second
-		if CurTime() - (self:GetOwnerSyncTime() or 0) > 1 then
-			self:SetOwnerSyncTime(0)
-			self:SetOwnerSyncRequested(false)
-		end
+		-- if CurTime() - (self:GetOwnerSyncTime() or 0) > 1 then
+		-- 	self:SetOwnerSyncTime(0)
+		-- 	self:SetOwnerSyncRequested(false)
+		-- end
 
 		if not self:GetOwnerSyncRequested() then
 			MsgDev("Requesting owner of ", self)
@@ -53,6 +78,18 @@ if CLIENT then
 		return nil
 	end
 elseif SERVER then
+	ENTITY.SetCreatorInternal = ENTITY.SetCreatorInternal or ENTITY.SetCreator
+
+	function ENTITY:SetCreator(Creator)
+		if IsValid(Creator) and Creator:IsPlayer() then
+			self:SetCreatorID(Creator:SteamID())
+		else
+			self:SetCreatorID(nil)
+		end
+
+		self:SetCreatorInternal(Creator)
+	end
+
 	util.AddNetworkString("gmsv_propprotection_sync")
 
 	net.Receive("gmsv_propprotection_sync", function(_, Requester)
@@ -68,6 +105,7 @@ elseif SERVER then
 		MsgDev("Replicating owner of ", Target, " to '", Requester:GetName(), "'")
 
 		net.Start("gmsv_propprotection_sync")
+			net.WriteBool(false)
 			net.WriteEntity(Target)
 			net.WriteEntity(Creator)
 			net.WriteBool(IsValid(Creator))
