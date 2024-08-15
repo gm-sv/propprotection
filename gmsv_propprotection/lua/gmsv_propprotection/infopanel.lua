@@ -58,7 +58,7 @@ function PANEL:Think()
 	if not IsValid(LookingEntity) then return self:Hide() end
 	if self.m_BlacklistedClasses[LookingEntity:GetClass()] then return self:Hide() end
 
-	local LookingOwner = LookingEntity:GetPropProtectionOwner()
+	local LookingOwner = LookingEntity:GetCreator()
 
 	local OwnerName = self:GetEntityName(LookingOwner)
 	local OwnerID = self:GetEntityID(LookingOwner)

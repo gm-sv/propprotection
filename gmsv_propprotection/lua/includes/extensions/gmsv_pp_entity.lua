@@ -1,13 +1,5 @@
 local ENTITY = FindMetaTable("Entity")
 
-function ENTITY:SetPropProtectionOwner(Owner)
-	if not IsValid(Owner) then
-		self.m_hOwner = NULL
-	else
-		self.m_hOwner = Owner
-	end
-end
-
 if CLIENT then
 	local CurTime = CurTime
 
@@ -21,13 +13,17 @@ if CLIENT then
 
 		MsgDev("Received owner of ", Target, ": ", Owner)
 
-		Target:SetPropProtectionOwner(Owner)
+		Target:SetCreator(Owner)
 		Target:SetOwnerSyncRequested(false)
 	end)
 
-	function ENTITY:GetPropProtectionOwner()
-		if self.m_hOwner ~= nil then
-			return self.m_hOwner
+	function ENTITY:SetCreator(Creator)
+		self.m_hCreator = Creator
+	end
+
+	function ENTITY:GetCreator()
+		if self.m_hCreator ~= nil then
+			return self.m_hCreator
 		end
 
 		-- Retry every second
@@ -64,11 +60,7 @@ elseif SERVER then
 
 		net.Start("gmsv_propprotection_sync")
 			net.WriteEntity(Target)
-			net.WriteEntity(Target:GetPropProtectionOwner())
+			net.WriteEntity(Target:GetCreator())
 		net.Send(Requester)
 	end)
-
-	function ENTITY:GetPropProtectionOwner()
-		return self.m_hOwner
-	end
 end
