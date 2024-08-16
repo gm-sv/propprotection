@@ -12,21 +12,29 @@ PANEL.m_BlacklistedClasses = {
 
 function PANEL:Init()
 	self:ParentToHUD()
-	self:Hide()
+	self:Hide(true)
 
 	self:SetBackgroundColor(Color(0, 0, 0, 100))
+	self:DockPadding(4, 4, 4, 4)
 
 	local InfoLabel = vgui.Create("DLabel", self)
 	InfoLabel:SetFont("BudgetLabel")
 	InfoLabel:SetTextColor(Color(255, 255, 255, 255))
-	InfoLabel:SetPos(4, 4)
 	self.m_InfoLabel = InfoLabel
 end
 
-function PANEL:Hide()
-	-- Hide without hiding so Think still runs
-	if self:GetWide() > 0 then
-		self:SetSize(0, 0)
+function PANEL:Hide(Instant)
+	if Instant then
+		-- Hide without hiding so Think still runs
+		if self:GetWide() > 0 then
+			self:SetSize(0, 0)
+		end
+	else
+		self:Stop()
+
+		self:AlphaTo(0, 3, 0, function(_, self)
+			self:Hide(true)
+		end)
 	end
 end
 
@@ -55,9 +63,14 @@ function PANEL:GetEntityID(Entity)
 end
 
 function PANEL:Think()
+	if FrameNumber() % 2 == 0 then return end -- Only update on odd frames
+
 	local LookingEntity = LocalPlayer():GetEyeTrace().Entity
 	if not IsValid(LookingEntity) then return self:Hide() end
 	if self.m_BlacklistedClasses[LookingEntity:GetClass()] then return self:Hide() end
+
+	self:Stop()
+	self:SetAlpha(255)
 
 	local LookingOwner = LookingEntity:GetCreator()
 
@@ -68,8 +81,10 @@ function PANEL:Think()
 	self.m_InfoLabel:SizeToContents()
 
 	local Width, Height = self.m_InfoLabel:GetSize()
+	local Left, Top, Right, Bottom = self:GetDockPadding()
 
-	self:SetSize(Width + 8, Height + 8)
+	self.m_InfoLabel:SetPos(Left, Top)
+	self:SetSize(Width + (Left + Right), Height + (Top + Bottom))
 
 	self:Center()
 	self:SetY(self:GetY() + 50) -- Move down
