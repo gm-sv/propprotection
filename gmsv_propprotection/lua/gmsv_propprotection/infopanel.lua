@@ -6,7 +6,8 @@ PANEL.m_BlacklistedClasses = {
 	["func_reflective_glass"] = true,
 	["gmod_hands"] = true,
 	["player"] = true,
-	["viewmodel_predicted"] = true
+	["viewmodel_predicted"] = true,
+	["worldspawn"] = true
 }
 
 function PANEL:Init()
